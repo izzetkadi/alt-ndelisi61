@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Maden Takip">
+<meta name="theme-color" content="#111210">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111210'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='Georgia,serif' font-weight='900' font-size='32' fill='%23C9A84C'%3E61%3C/text%3E%3C/svg%3E">
+<title>Maden Takip</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-l: #E0C070;
+    --gold-bg: rgba(201,168,76,0.12);
+    --silver: #9EB4C8;
+    --silver-bg: rgba(158,180,200,0.12);
+    --bg: #111210;
+    --surface: #1C1C1A;
+    --surface2: #242422;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.04);
+    --text: #EDE8DF;
+    --text2: #9A9488;
+    --muted: #5A5650;
+    --green: #4CAF7A;
+    --green-bg: rgba(76,175,122,0.12);
+    --red: #E06060;
+    --red-bg: rgba(224,96,96,0.12);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+
+  html, body { height: 100%; overflow: hidden; background: var(--bg); }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    flex-shrink: 0;
+    padding: calc(var(--safe-top) + 12px) 20px 12px;
+    background: rgba(17,18,16,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--gold);
+  }
+
+  .save-badge {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--green);
+    background: var(--green-bg);
+    padding: 3px 10px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .save-badge.show { opacity: 1; }
+
+  /* ── TAB BAR ── */
+  .tabbar {
+    flex-shrink: 0;
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 11px 0;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+    font-family: 'DM Mono', monospace;
+  }
+  .tab.active-gold  { color: var(--gold);   border-bottom-color: var(--gold); }
+  .tab.active-silver{ color: var(--silver); border-bottom-color: var(--silver); }
+  .tab.active-summary{ color: var(--gold);  border-bottom-color: var(--gold); }
+
+  /* ── SCROLL ── */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 14px calc(var(--safe-bot) + 14px);
+    background: var(--bg);
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  .sec-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* ── RATE CARD ── */
+  .rates-row { display: flex; gap: 14px; margin-bottom: 12px; }
+  .rate-item { flex: 1; }
+  .rate-name { font-size: 10px; color: var(--muted); margin-bottom: 3px; letter-spacing: 1px; }
+  .rate-value { font-size: 19px; font-weight: 500; }
+  .rate-time  { font-size: 10px; color: var(--muted); margin-top: 6px; }
+
+  .fetch-btn {
+    width: 100%;
+    background: var(--gold-bg);
+    border: 1px solid rgba(154,111,32,0.25);
+    color: var(--gold);
+    border-radius: 12px;
+    padding: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: 500;
+    -webkit-appearance: none;
+    transition: background 0.15s;
+  }
+  .fetch-btn:active  { background: rgba(201,168,76,0.2); }
+  .fetch-btn.loading { opacity: 0.55; }
+  .fetch-btn.error   { background: var(--red-bg); border-color: rgba(192,32,32,0.25); color: var(--red); }
+
+  /* ── INVESTMENT ROWS ── */
+  .inv-row {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .inv-note {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 7px 10px;
+    margin-bottom: 10px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .inv-note:focus { border-color: var(--gold-l); }
+
+  .inv-fields { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; align-items: end; }
+
+  .field-wrap label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .field-inner { position: relative; }
+  .field-inner input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    padding: 10px 28px 10px 10px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .field-inner input:focus { border-color: var(--gold-l); }
+  .field-suffix {
+    position: absolute; right: 9px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted); font-size: 11px; pointer-events: none;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: 1px solid rgba(224,96,96,0.25);
+    color: var(--red);
+    border-radius: 8px;
+    width: 36px; height: 36px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    align-self: flex-end; flex-shrink: 0;
+    -webkit-appearance: none;
+  }
+  .remove-btn:active { background: var(--red-bg); }
+
+  .add-btn {
+    width: 100%;
+    background: transparent;
+    border: 1.5px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    -webkit-appearance: none;
+  }
+  .add-btn:active { background: var(--surface2); }
+
+  /* ── RESULT BOX ── */
+  .result-box {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border2);
+    font-size: 13px;
+  }
+  .result-row:last-child { border-bottom: none; padding-top: 10px; padding-bottom: 2px; }
+  .result-key { color: var(--text2); }
+  .result-val { font-family: 'DM Mono', monospace; color: var(--text); font-weight: 500; }
+
+  /* ── SUMMARY ── */
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sum-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .sum-card.full { grid-column: 1/-1; }
+  .sum-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .sum-val   { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; color: var(--text); }
+
+  /* ── PNL ── */
+  .pnl-green { color: var(--green); }
+  .pnl-red   { color: var(--red); }
+  .pnl-muted { color: var(--muted); }
+  .pct-pill  {
+    display: inline-block; font-size: 11px;
+    padding: 2px 8px; border-radius: 20px;
+    margin-left: 5px; font-family: 'DM Mono', monospace;
+    vertical-align: middle;
+  }
+  .pct-green { background: var(--green-bg); color: var(--green); }
+  .pct-red   { background: var(--red-bg);   color: var(--red); }
+
+  /* ── MANUAL ── */
+  .manual-toggle {
+    font-size: 11px; letter-spacing: 1px; color: var(--muted);
+    text-transform: uppercase; cursor: pointer;
+    background: none; border: none;
+    font-family: 'DM Mono', monospace;
+    padding: 8px 0; width: 100%; text-align: left;
+  }
+  .manual-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .manual-label  { font-size: 10px; color: var(--muted); margin-bottom: 4px; letter-spacing: 1px; }
+
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  input[type=number] { -moz-appearance: textfield; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">Maden Takip</div>
+  <div class="save-badge" id="saveBadge">✓ Kaydedildi</div>
+</div>
+
+<div class="tabbar">
+  <div class="tab active-gold"   onclick="switchTab('gold')">🥇 Altın</div>
+  <div class="tab"               onclick="switchTab('silver')">🥈 Gümüş</div>
+  <div class="tab"               onclick="switchTab('summary')">📊 Özet</div>
+</div>
+
+<div class="scroll-area" id="scrollArea">
+
+  <!-- ══ GOLD TAB ══ -->
+  <div id="tab-gold">
+    <!-- Kur kartı -->
+    <div class="card">
+      <div class="sec-label">Dünya Katılım · Banka Alış Kuru</div>
+      <div class="rates-row">
+        <div class="rate-item">
+          <div class="rate-name">ALTIN ALIŞ</div>
+          <div class="rate-value" id="goldRateDisp" style="color:var(--gold)">—</div>
+        </div>
+        <div class="rate-item">
+          <div class="rate-name">GÜMÜŞ ALIŞ</div>
+          <div class="rate-value" id="silverRateDisp" style="color:var(--silver)">—</div>
+        </div>
+      </div>
+      <div class="rate-time" id="rateTime"></div>
+      <button class="fetch-btn" id="fetchBtn" onclick="fetchRates()">⬇ Güncel Kuru Çek</button>
+      <button class="manual-toggle" onclick="toggleManual()">▸ Manuel kur girişi</button>
+      <div id="manualFields" style="display:none" class="manual-fields">
+        <div>
+          <div class="manual-label">ALTIN (₺/gr)</div>
+          <div class="field-inner">
+            <input type="number" id="mGold" placeholder="7483.00" step="0.01" oninput="onManual('gold',this.value)">
+            <span class="field-suffix">₺</span>
+          </div>
+        </div>
+        <div>
+          <div class="manual-label">GÜMÜŞ (₺/gr)</div>
+          <div class="field-inner">
+            <input type="number" id="mSilver" placeholder="131.74" step="0.01" oninput="onManual('silver',this.value)">
+            <span class="field-suffix">₺</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    
+    </div>
+
+    <!-- Alımlar -->
+    <div id="goldRows"></div>
+    <button class="add-btn" onclick="addRow('gold')">+ Yeni Alım Ekle</button>
+
+    <!-- Sonuç -->
+    <div class="result-box">
+      <div class="result-row"><span class="result-key">Toplam Miktar</span><span class="result-val" id="rg-qty">—</span></div>
+      <div class="result-row"><span class="result-key">Ort. Maliyet/gr</span><span class="result-val" id="rg-avg">—</span></div>
+      <div class="result-row"><span class="result-key">Toplam Maliyet</span><span class="result-val" id="rg-cost">—</span></div>
+      <div class="result-row"><span class="result-key">Güncel Değer</span><span class="result-val" id="rg-curr">—</span></div>
+      <div class="result-row"><span class="result-key" style="color:var(--text);font-weight:500">Kar / Zarar</span><span id="rg-pnl">—</span></div>
+    </div>
+  </div>
+
+  <!-- ══ SILVER TAB ══ -->
+  <div id="tab-silver" style="display:none">
+    <div id="silverRows"></div>
+    <button class="add-btn" onclick="addRow('silver')">+ Yeni Alım Ekle</button>
+    <div class="result-box">
+      <div class="result-row"><span class="result-key">Toplam Miktar</span><span class="result-val" id="rs-qty">—</span></div>
+      <div class="result-row"><span class="result-key">Ort. Maliyet/gr</span><span class="result-val" id="rs-avg">—</span></div>
+      <div class="result-row"><span class="result-key">Toplam Maliyet</span><span class="result-val" id="rs-cost">—</span></div>
+      <div class="result-row"><span class="result-key">Güncel Değer</span><span class="result-val" id="rs-curr">—</span></div>
+      <div class="result-row"><span class="result-key" style="color:var(--text);font-weight:500">Kar / Zarar</span><span id="rs-pnl">—</span></div>
+    </div>
+  </div>
+
+  <!-- ══ SUMMARY TAB ══ -->
+  <div id="tab-summary" style="display:none">
+    <div class="summary-grid" style="margin-bottom:12px">
+      <div class="sum-card">
+        <div class="sum-label">Toplam Maliyet</div>
+        <div class="sum-val" id="s-cost">—</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">Güncel Değer</div>
+        <div class="sum-val" id="s-val" style="color:var(--gold)">—</div>
+      </div>
+      <div class="sum-card full">
+        <div class="sum-label">Net Kar / Zarar</div>
+        <div id="s-pnl" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700">—</div>
+      </div>
+    </div>
+
+    <div class="result-box" style="margin-bottom:12px">
+      <div class="result-row"><span class="result-key">🥇 Altın Değeri</span><span class="result-val" id="s-gv">—</span></div>
+      <div class="result-row"><span class="result-key">🥈 Gümüş Değeri</span><span class="result-val" id="s-sv">—</span></div>
+      <div class="result-row"><span class="result-key">Altın K/Z</span><span id="s-gpnl">—</span></div>
+      <div class="result-row"><span class="result-key">Gümüş K/Z</span><span id="s-spnl">—</span></div>
+    </div>
+
+    <button onclick="if(confirm('Tüm portföy silinsin mi?')){resetAll()}"
+      style="width:100%;background:transparent;border:1px solid rgba(192,32,32,0.2);color:var(--red);border-radius:12px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">
+      Portföyü Sıfırla
+    </button>
+  </div>
+
+</div><!-- end scroll-area -->
+
+<script>
+// ══ STATE ══
+let S = {
+  goldRate: null, silverRate: null, rateTime: null,
+
+  gold:   [{ qty:'', price:'', note:'' }],
+  silver: [{ qty:'', price:'', note:'' }],
+};
+let manualOpen = false;
+let saveTimer  = null;
+
+// ══ PERSIST ══
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem('maden-v3', JSON.stringify(S)); } catch(e){}
+    const b = document.getElementById('saveBadge');
+    b.classList.add('show');
+    setTimeout(() => b.classList.remove('show'), 1500);
+  }, 350);
+}
+
+function load() {
+  try {
+    // v3'te veri yoksa v2'den migrate et (katsayıları çıkar)
+    let raw = localStorage.getItem('maden-v3');
+    if (!raw) raw = localStorage.getItem('maden-v2');
+    if (raw) {
+      const d = JSON.parse(raw);
+      delete d.goldRatio; delete d.silverRatio;
+      S = { ...S, ...d };
+    }
+  } catch(e){}
+}
+
+// ══ TABS ══
+const TABS = ['gold','silver','summary'];
+function switchTab(t) {
+  TABS.forEach(x => {
+    document.getElementById('tab-'+x).style.display = x===t ? 'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach((el,i) => {
+    el.className = 'tab' + (TABS[i]===t ? ' active-'+TABS[i] : '');
+  });
+  if (t !== 'gold') renderRows(t === 'silver' ? 'silver' : null);
+  document.getElementById('scrollArea').scrollTop = 0;
+  calcAll();
+}
+
+// ══ RENDER ══
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+function rowBadgeHTML(row, rate) {
+  const q = parseFloat(row.qty)||0;
+  const p = parseFloat(row.price)||0;
+  if (!q || !p || !rate) return '';
+  const pnl = (q * rate) - (q * p);
+  const pct = (pnl / (q * p)) * 100;
+  const cls = pnl >= 0 ? 'pct-green' : 'pct-red';
+  const sign = pnl >= 0 ? '+' : '';
+  const tlStr = sign + pnl.toLocaleString('tr-TR', {minimumFractionDigits:0, maximumFractionDigits:0}) + ' ₺';
+  const pctStr = sign + pct.toFixed(1) + '%';
+  return `<span class="pct-pill ${cls}" style="font-size:11px;padding:3px 9px;white-space:nowrap">${pctStr} · ${tlStr}</span>`;
+}
+
+function renderRows(type) {
+  if (!type) return;
+  const rate = type==='gold' ? S.goldRate : S.silverRate;
+  const c = document.getElementById(type+'Rows');
+  c.innerHTML = '';
+  S[type].forEach((row, i) => {
+    const d = document.createElement('div');
+    d.className = 'inv-row';
+    d.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <input class="inv-note" type="text" value="${esc(row.note)}"
+          placeholder="Not — örn: Ocak 2024 alımı"
+          oninput="upd('${type}',${i},'note',this.value)"
+          style="margin-bottom:0;flex:1;margin-right:8px">
+        <span id="badge-${type}-${i}">${rowBadgeHTML(row, rate)}</span>
+      </div>
+      <div class="inv-fields">
+        <div class="field-wrap">
+          <label>Miktar (gr)</label>
+          <div class="field-inner">
+            <input type="number" inputmode="decimal" value="${esc(row.qty)}"
+              placeholder="0.000" step="0.001"
+              oninput="upd('${type}',${i},'qty',this.value)">
+            <span class="field-suffix">gr</span>
+          </div>
+        </div>
+        <div class="field-wrap">
+          <label>Alış Fiyatı</label>
+          <div class="field-inner">
+            <input type="number" inputmode="decimal" value="${esc(row.price)}"
+              placeholder="0.00" step="0.01"
+              oninput="upd('${type}',${i},'price',this.value)">
+            <span class="field-suffix">₺</span>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeRow('${type}',${i})">×</button>
+      </div>`;
+    c.appendChild(d);
+  });
+  calcAll();
+}
+
+function upd(type, i, field, val) {
+  S[type][i][field] = val;
+  calcAll(); save();
+}
+
+function addRow(type) {
+  S[type].push({ qty:'', price:'', note:'' });
+  renderRows(type); save();
+}
+
+function removeRow(type, i) {
+  if (S[type].length <= 1) S[type][0] = { qty:'', price:'', note:'' };
+  else S[type].splice(i, 1);
+  renderRows(type); save();
+}
+
+// ══ CALC ══
+function calcAsset(rows, rate) {
+  let qty=0, cost=0;
+  rows.forEach(r => { const q=parseFloat(r.qty)||0, p=parseFloat(r.price)||0; qty+=q; cost+=q*p; });
+  const avg  = qty>0 ? cost/qty : 0;
+  const curr = rate && qty>0 ? qty*rate : null;
+  const pnl  = curr!==null ? curr-cost : null;
+  const pct  = cost>0 && pnl!==null ? (pnl/cost)*100 : null;
+  return {qty, cost, avg, curr, pnl, pct};
+}
+
+function fmt(n, dec=2) {
+  if (n===null||isNaN(n)) return '—';
+  return n.toLocaleString('tr-TR',{minimumFractionDigits:dec,maximumFractionDigits:dec})+' ₺';
+}
+function fmtGr(n) {
+  if (!n && n!==0) return '—';
+  return n.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3})+' gr';
+}
+function sgn(n){ return n>=0?'+':''; }
+
+function pnlHTML(val, pct, large) {
+  if (val===null||isNaN(val)) return '<span style="color:var(--muted)">—</span>';
+  const cl = val>0?'pnl-green':val<0?'pnl-red':'pnl-muted';
+  const pcl= val>0?'pct-green':'pct-red';
+  const fs = large ? 'font-size:24px;' : '';
+  let h = `<span class="${cl}" style="font-family:'DM Mono',monospace;font-weight:600;${fs}">${sgn(val)}${fmt(val)}</span>`;
+  if (pct!==null) h += `<span class="pct-pill ${pcl}">${sgn(pct)}${pct.toFixed(2)}%</span>`;
+  return h;
+}
+
+function refreshBadges(type) {
+  const rate = type==='gold' ? S.goldRate : S.silverRate;
+  S[type].forEach((row, i) => {
+    const el = document.getElementById(`badge-${type}-${i}`);
+    if (el) el.innerHTML = rowBadgeHTML(row, rate);
+  });
+}
+
+function calcAll() {
+  refreshBadges('gold');
+  refreshBadges('silver');
+  const g = calcAsset(S.gold,   S.goldRate);
+  const s = calcAsset(S.silver, S.silverRate);
+
+  // Gold tab
+  document.getElementById('rg-qty').textContent  = fmtGr(g.qty);
+  document.getElementById('rg-avg').textContent  = g.qty>0 ? fmt(g.avg) : '—';
+  document.getElementById('rg-cost').textContent = g.cost>0 ? fmt(g.cost) : '—';
+  document.getElementById('rg-curr').textContent = g.curr!==null ? fmt(g.curr) : '—';
+  document.getElementById('rg-pnl').innerHTML    = pnlHTML(g.pnl, g.pct);
+
+  // Silver tab
+  document.getElementById('rs-qty').textContent  = fmtGr(s.qty);
+  document.getElementById('rs-avg').textContent  = s.qty>0 ? fmt(s.avg) : '—';
+  document.getElementById('rs-cost').textContent = s.cost>0 ? fmt(s.cost) : '—';
+  document.getElementById('rs-curr').textContent = s.curr!==null ? fmt(s.curr) : '—';
+  document.getElementById('rs-pnl').innerHTML    = pnlHTML(s.pnl, s.pct);
+
+  // Summary
+  const tc=g.cost+s.cost, tv=(g.curr||0)+(s.curr||0), tp=(g.pnl||0)+(s.pnl||0);
+  const tpct = tc>0 ? (tp/tc)*100 : null;
+  document.getElementById('s-cost').textContent = tc>0 ? fmt(tc) : '—';
+  document.getElementById('s-val').textContent  = (S.goldRate||S.silverRate)&&tc>0 ? fmt(tv) : '—';
+  document.getElementById('s-pnl').innerHTML    = (S.goldRate||S.silverRate)&&tc>0 ? pnlHTML(tp,tpct,true) : '<span style="color:var(--muted)">—</span>';
+  document.getElementById('s-gv').textContent   = g.curr!==null ? fmt(g.curr) : '—';
+  document.getElementById('s-sv').textContent   = s.curr!==null ? fmt(s.curr) : '—';
+  document.getElementById('s-gpnl').innerHTML   = pnlHTML(g.pnl, g.pct);
+  document.getElementById('s-spnl').innerHTML   = pnlHTML(s.pnl, s.pct);
+}
+
+// ══ RATE DISPLAY ══
+function showRates() {
+  document.getElementById('goldRateDisp').textContent   = S.goldRate   ? fmt(S.goldRate)+'/gr'   : '—';
+  document.getElementById('silverRateDisp').textContent = S.silverRate ? fmt(S.silverRate)+'/gr' : '—';
+  if (S.rateTime) document.getElementById('rateTime').textContent = 'Güncelleme: ' + S.rateTime;
+  if (S.goldRate)   document.getElementById('mGold').value   = S.goldRate;
+  if (S.silverRate) document.getElementById('mSilver').value = S.silverRate;
+}
+
+// ══ FETCH — Netlify proxy → Dünya Katılım (fallback: truncgil) ══
+async function fetchRates() {
+  const btn = document.getElementById('fetchBtn');
+  btn.textContent = '⟳ Çekiliyor...';
+  btn.className = 'fetch-btn loading';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/.netlify/functions/rates');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const gr = parseFloat(data.goldBuy);
+    const sr = parseFloat(data.silverBuy);
+    if (!gr || !sr || gr < 100 || sr < 1) throw new Error('geçersiz değer');
+
+    S.goldRate   = Math.round(gr * 100) / 100;
+    S.silverRate = Math.round(sr * 100) / 100;
+    S.rateTime   = (data.source === 'dunyakatilim' ? '🏦 ' : '📡 ') + (data.time || new Date().toLocaleTimeString('tr-TR'));
+    showRates(); calcAll(); save();
+    btn.textContent = '↻ Kuru Güncelle';
+    btn.className = 'fetch-btn';
+  } catch(e) {
+    console.error('Kur çekme hatası:', e);
+    btn.textContent = '✕ Hata – Tekrar Dene';
+    btn.className = 'fetch-btn error';
+  }
+  btn.disabled = false;
+}
+
+// ══ MANUAL ══
+function onManual(type, val) {
+  const v = parseFloat(val) || null;
+  if (type==='gold')   S.goldRate   = v;
+  else                 S.silverRate = v;
+  showRates(); calcAll(); save();
+}
+
+function toggleManual() {
+  manualOpen = !manualOpen;
+  document.getElementById('manualFields').style.display = manualOpen ? 'grid' : 'none';
+  document.querySelectorAll('.manual-toggle')[0].textContent = (manualOpen?'▾':'▸') + ' Manuel kur girişi';
+}
+
+}
+
+// ══ RESET ══
+function resetAll() {
+  S.gold   = [{ qty:'', price:'', note:'' }];
+  S.silver = [{ qty:'', price:'', note:'' }];
+  renderRows('gold'); renderRows('silver'); save();
+}
+
+// ══ SW ══
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+// ══ INIT ══
+load();
+renderRows('gold');
+renderRows('silver');
+showRates();
+calcAll();
+</script>
+</body>
+</html>
