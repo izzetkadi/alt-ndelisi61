@@ -278,6 +278,7 @@ input[type=number] { -moz-appearance: textfield; }
       <div class="result-row"><span class="result-key">🥈 Gümüş Değeri</span><span class="result-val" id="s-sv">—</span></div>
       <div class="result-row"><span class="result-key">Altın K/Z</span><span id="s-gpnl">—</span></div>
       <div class="result-row"><span class="result-key">Gümüş K/Z</span><span id="s-spnl">—</span></div>
+      <div class="result-row" style="border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;padding-top:8px"><span class="result-key" style="color:var(--muted)">Ödenen Komisyon</span><span class="result-val" id="s-komisyon" style="color:var(--muted)">—</span></div>
     </div>
     <button onclick="if(confirm('Tüm portföy silinsin mi?')){resetAll()}"
       style="width:100%;background:transparent;border:1px solid rgba(224,96,96,0.2);color:var(--red);border-radius:12px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">
@@ -481,6 +482,10 @@ function calcAll() {
   document.getElementById('s-sv').textContent   = s.curr!==null ? fmt(s.curr) : '—';
   document.getElementById('s-gpnl').innerHTML   = pnlHTML(g.pnl, g.pct);
   document.getElementById('s-spnl').innerHTML   = pnlHTML(s.pnl, s.pct);
+  // Toplam ödenen komisyon
+  const gKom = S.gold.reduce((a,r)=>{const b=(parseFloat(r.qty)||0)*(parseFloat(r.price)||0);return a+b*0.002;},0);
+  const sKom = S.silver.reduce((a,r)=>{const b=(parseFloat(r.qty)||0)*(parseFloat(r.price)||0);return a+b*0.002;},0);
+  document.getElementById('s-komisyon').textContent = (gKom+sKom)>0 ? fmt(gKom+sKom) : '—';
 }
 
 function showRates() {
