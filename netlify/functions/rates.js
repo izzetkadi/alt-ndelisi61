@@ -11,7 +11,22 @@ exports.handler = async function () {
     const goldMatch   = html.match(/XAU[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>\s*<td[^>]*>\s*([\d.,]+)/);
     const silverMatch = html.match(/XAG[\s\S]*?<td[^>]*>\s*([\d.,]+)\s*<\/td>\s*<td[^>]*>\s*([\d.,]+)/);
     const timeMatch   = html.match(/Son Güncelleme\s*[:：]?\s*([0-9.:/ ]+)/i);
-    const parse = (s) => s ? parseFloat(s.replace(/\./g, "").replace(",", ".")) : null;
+    const parse = (s) => {
+  if (!s) return null;
+  s = s.trim();
+  if (s.includes(",") && s.includes(".")) {
+    const lastComma = s.lastIndexOf(",");
+    const lastDot   = s.lastIndexOf(".");
+    if (lastComma > lastDot) {
+      s = s.replace(/\./g, "").replace(",", ".");
+    } else {
+      s = s.replace(/,/g, "");
+    }
+  } else if (s.includes(",")) {
+    s = s.replace(",", ".");
+  }
+  return parseFloat(s);
+};
     const goldBuy   = goldMatch   ? parse(goldMatch[1])   : null;
     const silverBuy = silverMatch ? parse(silverMatch[1]) : null;
     const time      = timeMatch   ? timeMatch[1].trim()   : new Date().toLocaleString("tr-TR");
