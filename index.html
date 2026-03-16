@@ -41,7 +41,7 @@ body { font-family: 'DM Mono', monospace; color: var(--text); display: flex; fle
 
 .topbar {
   flex-shrink: 0;
-  padding: calc(var(--safe-top) + 12px) 20px 12px;
+  padding: calc(var(--safe-top) + 8px) 16px 8px;
   background: rgba(17,18,16,0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -58,7 +58,7 @@ body { font-family: 'DM Mono', monospace; color: var(--text); display: flex; fle
 
 .tabbar { flex-shrink: 0; display: flex; background: var(--surface); border-bottom: 1px solid var(--border); }
 .tab {
-  flex: 1; padding: 11px 0; text-align: center; font-size: 11px;
+  flex: 1; padding: 8px 0; text-align: center; font-size: 11px;
   letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
   cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;
   -webkit-user-select: none; user-select: none; font-family: 'DM Mono', monospace;
@@ -70,28 +70,28 @@ body { font-family: 'DM Mono', monospace; color: var(--text); display: flex; fle
 .scroll-area {
   flex: 1; overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 14px 14px calc(var(--safe-bot) + 14px);
+  padding: 10px 10px calc(var(--safe-bot) + 10px);
   background: var(--bg);
 }
 .scroll-area::-webkit-scrollbar { display: none; }
 
 .card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 16px; padding: 16px; margin-bottom: 12px;
+  border-radius: 12px; padding: 11px; margin-bottom: 8px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 .sec-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 
-.rates-row { display: flex; gap: 14px; margin-bottom: 12px; }
+.rates-row { display: flex; gap: 10px; margin-bottom: 8px; }
 .rate-item { flex: 1; }
 .rate-name  { font-size: 10px; color: var(--muted); margin-bottom: 3px; letter-spacing: 1px; }
-.rate-value { font-size: 19px; font-weight: 500; }
-.rate-time  { font-size: 10px; color: var(--muted); margin-top: 6px; margin-bottom: 10px; }
+.rate-value { font-size: 16px; font-weight: 500; }
+.rate-time  { font-size: 10px; color: var(--muted); margin-top: 4px; margin-bottom: 7px; }
 
 .fetch-btn {
   width: 100%; background: var(--gold-bg); border: 1px solid rgba(201,168,76,0.25);
-  color: var(--gold); border-radius: 12px; padding: 12px;
-  font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px;
+  color: var(--gold); border-radius: 10px; padding: 9px;
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1.5px;
   text-transform: uppercase; cursor: pointer; font-weight: 500;
   -webkit-appearance: none; transition: background 0.15s;
 }
@@ -109,25 +109,25 @@ body { font-family: 'DM Mono', monospace; color: var(--text); display: flex; fle
 
 .inv-row {
   background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 12px; padding: 12px; margin-bottom: 10px;
+  border-radius: 10px; padding: 9px; margin-bottom: 7px;
 }
 .inv-note {
   width: 100%; background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; color: var(--muted); font-family: 'DM Mono', monospace;
-  font-size: 12px; padding: 7px 10px; outline: none; -webkit-appearance: none;
+  font-size: 12px; padding: 5px 8px; outline: none; -webkit-appearance: none;
 }
 .inv-note:focus { border-color: var(--gold-l); }
 
-.inv-fields { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; align-items: end; }
+.inv-fields { display: grid; grid-template-columns: 1fr 1fr 30px; gap: 6px; align-items: end; }
 .field-wrap label {
   font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--muted); display: block; margin-bottom: 5px;
+  color: var(--muted); display: block; margin-bottom: 3px;
 }
 .field-inner { position: relative; }
 .field-inner input {
   width: 100%; background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace;
-  font-size: 15px; padding: 10px 28px 10px 10px; outline: none;
+  font-size: 14px; padding: 7px 26px 7px 9px; outline: none;
   -webkit-appearance: none; appearance: none;
 }
 .field-inner input:focus { border-color: var(--gold-l); }
@@ -138,7 +138,7 @@ body { font-family: 'DM Mono', monospace; color: var(--text); display: flex; fle
 
 .remove-btn {
   background: transparent; border: 1px solid rgba(224,96,96,0.25); color: var(--red);
-  border-radius: 8px; width: 36px; height: 36px; font-size: 20px; cursor: pointer;
+  border-radius: 7px; width: 30px; height: 30px; font-size: 17px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   align-self: flex-end; flex-shrink: 0; -webkit-appearance: none;
 }
@@ -146,29 +146,29 @@ body { font-family: 'DM Mono', monospace; color: var(--text); display: flex; fle
 
 .add-btn {
   width: 100%; background: transparent; border: 1.5px dashed var(--border);
-  border-radius: 12px; color: var(--muted); font-family: 'DM Mono', monospace;
+  border-radius: 10px; color: var(--muted); font-family: 'DM Mono', monospace;
   font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-  padding: 12px; cursor: pointer; margin-bottom: 12px; -webkit-appearance: none;
+  padding: 9px; cursor: pointer; margin-bottom: 8px; -webkit-appearance: none;
 }
 .add-btn:active { background: var(--surface2); }
 
-.result-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 14px; padding: 12px 14px; }
+.result-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 11px; }
 .result-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 6px 0; border-bottom: 1px solid var(--border2); font-size: 13px;
+  padding: 4px 0; border-bottom: 1px solid var(--border2); font-size: 12px;
 }
-.result-row:last-child { border-bottom: none; padding-top: 10px; padding-bottom: 2px; }
+.result-row:last-child { border-bottom: none; padding-top: 7px; padding-bottom: 1px; }
 .result-key { color: var(--text2); }
 .result-val { font-family: 'DM Mono', monospace; color: var(--text); font-weight: 500; }
 
-.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .sum-card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 14px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  border-radius: 11px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 .sum-card.full { grid-column: 1/-1; }
 .sum-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-.sum-val   { font-family: 'Playfair Display', serif; font-size: 21px; font-weight: 700; color: var(--text); }
+.sum-val   { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text); }
 
 .pnl-green { color: var(--green); }
 .pnl-red   { color: var(--red); }
@@ -201,13 +201,13 @@ input[type=number] { -moz-appearance: textfield; }
 .modal-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 .modal-result { background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; }
 .modal-result-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-.modal-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
 .modal-confirm { background: var(--green-bg); border: 1px solid rgba(76,175,122,0.3); color: var(--green); border-radius: 12px; padding: 13px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; font-weight: 500; -webkit-appearance: none; }
 .modal-confirm:disabled { opacity: 0.35; cursor: default; }
 .modal-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 12px; padding: 13px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; -webkit-appearance: none; }
-.sell-btn { width: 100%; background: transparent; border: 1px solid rgba(76,175,122,0.2); border-radius: 12px; color: var(--green); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 11px; cursor: pointer; margin-bottom: 12px; -webkit-appearance: none; }
+.sell-btn { width: 100%; background: transparent; border: 1px solid rgba(76,175,122,0.2); border-radius: 12px; color: var(--green); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 8px; cursor: pointer; margin-bottom: 8px; -webkit-appearance: none; }
 .sell-btn:active { background: var(--green-bg); }
-.sale-row { background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+.sale-row { background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 11px; margin-bottom: 6px; }
 .sale-row-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .sale-meta { font-size: 11px; color: var(--muted); }
 </style>
@@ -267,7 +267,7 @@ input[type=number] { -moz-appearance: textfield; }
       <div class="rates-row">
         <div class="rate-item">
           <div class="rate-name">ALTIN ALIŞ</div>
-          <div class="rate-value" id="goldRateDisp" style="color:var(--gold)">—</div>
+          <div class="rate-value" id="goldRateDisp" style="color:var(--gold);font-size:16px">—</div>
         </div>
         <div class="rate-item">
           <div class="rate-name">GÜMÜŞ ALIŞ</div>
@@ -324,7 +324,7 @@ input[type=number] { -moz-appearance: textfield; }
 
   <!-- SUMMARY TAB -->
   <div id="tab-summary" style="display:none">
-    <div class="summary-grid" style="margin-bottom:12px">
+    <div class="summary-grid" style="margin-bottom:8px">
       <div class="sum-card">
         <div class="sum-label">Toplam Maliyet</div>
         <div class="sum-val" id="s-cost">—</div>
@@ -335,10 +335,10 @@ input[type=number] { -moz-appearance: textfield; }
       </div>
       <div class="sum-card full">
         <div class="sum-label">Net Kar / Zarar</div>
-        <div id="s-pnl" style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700">—</div>
+        <div id="s-pnl" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700">—</div>
       </div>
     </div>
-    <div class="result-box" style="margin-bottom:12px">
+    <div class="result-box" style="margin-bottom:8px">
       <div class="result-row"><span class="result-key">🥇 Altın Değeri</span><span class="result-val" id="s-gv">—</span></div>
       <div class="result-row"><span class="result-key">🥈 Gümüş Değeri</span><span class="result-val" id="s-sv">—</span></div>
       <div class="result-row"><span class="result-key">Altın K/Z</span><span id="s-gpnl">—</span></div>
