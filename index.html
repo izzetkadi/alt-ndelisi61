@@ -180,9 +180,72 @@ body { font-family: 'DM Mono', monospace; color: var(--text); display: flex; fle
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 input[type=number] { -moz-appearance: textfield; }
+
+/* SATIŞ MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0; padding: 24px 20px calc(var(--safe-bot) + 28px);
+  width: 100%; max-width: 480px;
+  transform: translateY(40px); transition: transform 0.25s ease;
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.modal-sub { font-size: 11px; color: var(--muted); margin-bottom: 20px; letter-spacing: 1px; }
+.modal-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.modal-result { background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; }
+.modal-result-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.modal-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-confirm { background: var(--green-bg); border: 1px solid rgba(76,175,122,0.3); color: var(--green); border-radius: 12px; padding: 13px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; font-weight: 500; -webkit-appearance: none; }
+.modal-confirm:disabled { opacity: 0.35; cursor: default; }
+.modal-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 12px; padding: 13px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; -webkit-appearance: none; }
+.sell-btn { width: 100%; background: transparent; border: 1px solid rgba(76,175,122,0.2); border-radius: 12px; color: var(--green); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 11px; cursor: pointer; margin-bottom: 12px; -webkit-appearance: none; }
+.sell-btn:active { background: var(--green-bg); }
+.sale-row { background: var(--surface2); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+.sale-row-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.sale-meta { font-size: 11px; color: var(--muted); }
 </style>
 </head>
 <body>
+
+
+<!-- SATIŞ MODAL -->
+<div class="modal-overlay" id="saleModal" onclick="if(event.target===this)closeSaleModal()">
+  <div class="modal-sheet">
+    <div class="modal-title" id="saleModalTitle">Altın Sat</div>
+    <div class="modal-sub" id="saleModalSub">ORT. MALİYET: —</div>
+    <div class="modal-fields">
+      <div>
+        <div class="manual-label">MİKTAR (gr)</div>
+        <div class="field-inner">
+          <input type="number" inputmode="decimal" id="saleQty" placeholder="0.000" step="0.001" oninput="calcSalePreview()">
+          <span class="field-suffix">gr</span>
+        </div>
+      </div>
+      <div>
+        <div class="manual-label">SATIŞ FİYATI (₺/gr)</div>
+        <div class="field-inner">
+          <input type="number" inputmode="decimal" id="salePrice" placeholder="0.00" step="0.01" oninput="calcSalePreview()">
+          <span class="field-suffix">₺</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-result">
+      <span class="modal-result-label">Tahmini Kar / Zarar</span>
+      <span id="salePnlPreview" style="font-family:'DM Mono',monospace;font-weight:600;color:var(--muted)">—</span>
+    </div>
+    <div class="modal-btn-row">
+      <button class="modal-cancel" onclick="closeSaleModal()">İptal</button>
+      <button class="modal-confirm" id="saleConfirmBtn" onclick="confirmSale()" disabled>Sat ✓</button>
+    </div>
+  </div>
+</div>
 
 <div class="topbar">
   <div class="topbar-title">Maden Takip</div>
@@ -234,6 +297,7 @@ input[type=number] { -moz-appearance: textfield; }
 
     <div id="goldRows"></div>
     <button class="add-btn" onclick="addRow('gold')">+ Yeni Alım Ekle</button>
+    <button class="sell-btn" onclick="openSaleModal('gold')">↑ Altın Sat</button>
 
     <div class="result-box">
       <div class="result-row"><span class="result-key">Toplam Miktar</span><span class="result-val" id="rg-qty">—</span></div>
@@ -248,6 +312,7 @@ input[type=number] { -moz-appearance: textfield; }
   <div id="tab-silver" style="display:none">
     <div id="silverRows"></div>
     <button class="add-btn" onclick="addRow('silver')">+ Yeni Alım Ekle</button>
+    <button class="sell-btn" onclick="openSaleModal('silver')">↑ Gümüş Sat</button>
     <div class="result-box">
       <div class="result-row"><span class="result-key">Toplam Miktar</span><span class="result-val" id="rs-qty">—</span></div>
       <div class="result-row"><span class="result-key">Ort. Maliyet/gr</span><span class="result-val" id="rs-avg">—</span></div>
@@ -280,7 +345,11 @@ input[type=number] { -moz-appearance: textfield; }
       <div class="result-row"><span class="result-key">Gümüş K/Z</span><span id="s-spnl">—</span></div>
       <div class="result-row" style="border-top:1px solid rgba(255,255,255,0.06);margin-top:4px;padding-top:8px"><span class="result-key" style="color:var(--muted)">Ödenen Komisyon</span><span class="result-val" id="s-komisyon" style="color:var(--muted)">—</span></div>
     </div>
-    <button onclick="if(confirm('Tüm portföy silinsin mi?')){resetAll()}"
+    <div id="salesHistorySection" style="margin-bottom:12px;display:none">
+      <div class="sec-label" style="margin-bottom:8px">Satış Geçmişi</div>
+      <div id="salesHistoryList"></div>
+    </div>
+        <button onclick="if(confirm('Tüm portföy silinsin mi?')){resetAll()}"
       style="width:100%;background:transparent;border:1px solid rgba(224,96,96,0.2);color:var(--red);border-radius:12px;padding:12px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">
       Portföyü Sıfırla
     </button>
@@ -295,6 +364,7 @@ let S = {
   goldRate: null, silverRate: null, rateTime: null,
   gold:   [{ qty:'', price:'', note:'' }],
   silver: [{ qty:'', price:'', note:'' }],
+  sales: [],
 };
 let manualOpen = false;
 let saveTimer  = null;
@@ -538,7 +608,126 @@ function toggleManual() {
 function resetAll() {
   S.gold   = [{ qty:'', price:'', note:'' }];
   S.silver = [{ qty:'', price:'', note:'' }];
-  renderRows('gold'); renderRows('silver'); save();
+  S.sales = [];
+  renderRows('gold'); renderRows('silver'); renderSalesHistory(); save();
+}
+
+
+// ── SATIŞ FONKSİYONLARI ──────────────────────────────────────────
+let saleModalType = 'gold';
+
+function openSaleModal(type) {
+  saleModalType = type;
+  const asset = calcAsset(S[type], null);
+  const label = type === 'gold' ? '🥇 Altın Sat' : '🥈 Gümüş Sat';
+  document.getElementById('saleModalTitle').textContent = label;
+  document.getElementById('saleModalSub').textContent =
+    asset.qty > 0
+      ? 'ELİNİZDE: ' + asset.qty.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3}) + ' gr  ·  ORT. MALİYET: ' + asset.avg.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺/gr'
+      : 'Portföyde ' + (type==='gold'?'altın':'gümüş') + ' yok';
+  document.getElementById('saleQty').value = '';
+  document.getElementById('salePrice').value = '';
+  document.getElementById('salePnlPreview').textContent = '—';
+  document.getElementById('salePnlPreview').style.color = 'var(--muted)';
+  document.getElementById('saleConfirmBtn').disabled = true;
+  document.getElementById('saleModal').classList.add('open');
+  setTimeout(() => document.getElementById('saleQty').focus(), 300);
+}
+
+function closeSaleModal() {
+  document.getElementById('saleModal').classList.remove('open');
+}
+
+function calcSalePreview() {
+  const q = parseFloat(document.getElementById('saleQty').value) || 0;
+  const sp = parseFloat(document.getElementById('salePrice').value) || 0;
+  const asset = calcAsset(S[saleModalType], null);
+  const btn = document.getElementById('saleConfirmBtn');
+  const preview = document.getElementById('salePnlPreview');
+
+  if (!q || !sp || q <= 0 || sp <= 0 || q > asset.qty + 0.0001) {
+    preview.textContent = q > asset.qty + 0.0001 ? '⚠ Yetersiz miktar' : '—';
+    preview.style.color = 'var(--red)';
+    btn.disabled = true;
+    return;
+  }
+
+  // Satış geliri - ortalama maliyet (komisyon dahil)
+  const revenue = q * sp;
+  const cost = q * asset.avg; // avg zaten komisyon dahil
+  const pnl = revenue - cost;
+  const pct = (pnl / cost) * 100;
+  const sign = pnl >= 0 ? '+' : '';
+  preview.innerHTML = sign + pnl.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺  (' + sign + pct.toFixed(1) + '%)';
+  preview.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  btn.disabled = false;
+}
+
+function confirmSale() {
+  const q = parseFloat(document.getElementById('saleQty').value) || 0;
+  const sp = parseFloat(document.getElementById('salePrice').value) || 0;
+  if (!q || !sp) return;
+
+  const asset = calcAsset(S[saleModalType], null);
+  const avgCost = asset.avg;
+  const revenue = q * sp;
+  const cost = q * avgCost;
+  const pnl = revenue - cost;
+
+  // Geçmişe ekle
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' + now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+  S.sales.unshift({ type: saleModalType, qty: q, salePrice: sp, avgCost, pnl, date: dateStr });
+
+  // Gramı düş — FIFO mantığıyla satırlardan çıkar
+  let remaining = q;
+  const rows = S[saleModalType];
+  for (let i = 0; i < rows.length && remaining > 0.00001; i++) {
+    const rowQty = parseFloat(rows[i].qty) || 0;
+    if (rowQty <= remaining + 0.00001) {
+      remaining -= rowQty;
+      rows[i].qty = 0;
+    } else {
+      rows[i].qty = parseFloat((rowQty - remaining).toFixed(6));
+      remaining = 0;
+    }
+  }
+  // Sıfır gramları temizle ama en az bir satır kalsın
+  const nonZero = rows.filter(r => (parseFloat(r.qty)||0) > 0);
+  S[saleModalType] = nonZero.length > 0 ? nonZero : [{ qty:'', price:'', note:'' }];
+
+  save();
+  renderRows(saleModalType);
+  renderSalesHistory();
+  calcAll();
+  closeSaleModal();
+}
+
+function renderSalesHistory() {
+  const list = document.getElementById('salesHistoryList');
+  const section = document.getElementById('salesHistorySection');
+  if (!list) return;
+  if (!S.sales || S.sales.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  list.innerHTML = S.sales.map((s, i) => {
+    const sign = s.pnl >= 0 ? '+' : '';
+    const cl = s.pnl >= 0 ? 'pnl-green' : 'pnl-red';
+    const em = s.type === 'gold' ? '🥇' : '🥈';
+    const pct = (s.pnl / (s.qty * s.avgCost)) * 100;
+    return `<div class="sale-row">
+      <div class="sale-row-top">
+        <span style="font-size:13px;color:var(--text)">\${em} \${s.qty.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3})} gr</span>
+        <span class="\${cl}" style="font-family:'DM Mono',monospace;font-weight:600;font-size:13px">\${sign}\${s.pnl.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="sale-meta">\${s.date}  ·  \${s.salePrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺/gr'den</span>
+        <span class="\${cl}" style="font-size:11px">\${sign}\${pct.toFixed(1)}%</span>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
@@ -548,6 +737,7 @@ renderRows('gold');
 renderRows('silver');
 showRates();
 calcAll();
+renderSalesHistory();
 </script>
 </body>
 </html>
