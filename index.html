@@ -717,16 +717,20 @@ function renderSalesHistory() {
     const cl = s.pnl >= 0 ? 'pnl-green' : 'pnl-red';
     const em = s.type === 'gold' ? '🥇' : '🥈';
     const pct = (s.pnl / (s.qty * s.avgCost)) * 100;
-    return `<div class="sale-row">
-      <div class="sale-row-top">
-        <span style="font-size:13px;color:var(--text)">\${em} \${s.qty.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3})} gr</span>
-        <span class="\${cl}" style="font-family:'DM Mono',monospace;font-weight:600;font-size:13px">\${sign}\${s.pnl.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="sale-meta">\${s.date}  ·  \${s.salePrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})} ₺/gr'den</span>
-        <span class="\${cl}" style="font-size:11px">\${sign}\${pct.toFixed(1)}%</span>
-      </div>
-    </div>`;
+    const qtyStr = s.qty.toLocaleString('tr-TR',{minimumFractionDigits:3,maximumFractionDigits:3});
+    const pnlStr = s.pnl.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const priceStr = s.salePrice.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    const pctStr = pct.toFixed(1);
+    return '<div class="sale-row">'
+      + '<div class="sale-row-top">'
+      + '<span style="font-size:13px;color:var(--text)">' + em + ' ' + qtyStr + ' gr</span>'
+      + '<span class="' + cl + '" style="font-family:\'DM Mono\',monospace;font-weight:600;font-size:13px">' + sign + pnlStr + ' ₺</span>'
+      + '</div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center">'
+      + '<span class="sale-meta">' + s.date + '  ·  ' + priceStr + ' ₺/gr\'den</span>'
+      + '<span class="' + cl + '" style="font-size:11px">' + sign + pctStr + '%</span>'
+      + '</div>'
+      + '</div>';
   }).join('');
 }
 
